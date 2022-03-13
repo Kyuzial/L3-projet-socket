@@ -1,7 +1,7 @@
 CC = gcc
 CFLAGS = -g -Wall
-BIN_CL = cleint
-BIN_SV = server
+BIN_CL = client.out
+BIN_SV = server.out
 SRCS_CL = src/client/client.c
 SRCS_SV = src/server/server.c
 
