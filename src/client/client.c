@@ -1,7 +1,13 @@
-#include <stdio.h>
-#include <stdlib.h>
+#include <stdio.h> 
+#include <sys/socket.h> 
+#include <arpa/inet.h> 
+#include <unistd.h> 
+#include <string.h> 
 
-int main () {
+#define PORT 8080
+
+int main()
+{
     printf("Hello World!");
     return 1;
 }
