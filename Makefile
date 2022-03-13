@@ -1,10 +1,15 @@
 CC = gcc
 CFLAGS = -g -Wall
-BIN = main
-SRCS = src/main.c
+BIN_CL = cleint
+BIN_SV = server
+SRCS_CL = src/client/client.c
+SRCS_SV = src/server/server.c
 
-socket: $(SRCS)
-	$(CC) $(CFLAGS) -o $(BIN) $(SRCS)
+client: $(SRCS_CL)
+	$(CC) $(CFLAGS) -o $(BIN_CL) $(SRCS_CL)
+
+server: $(SRCS_SV)
+	$(CC) $(CFLAGS) -o $(BIN_SV) $(SRCS_SV)
 
 clean:
 	rm -f main
