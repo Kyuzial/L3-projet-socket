@@ -8,6 +8,6 @@
 
 int main()
 {
-    printf("Hello World!");
+    int connect(int sockfd, const struct sockaddr *addr, socklen_t addrlen);
     return 1;
 }
