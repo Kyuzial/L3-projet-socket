@@ -7,16 +7,21 @@
 
 #define PORT 8080
 
-int main()
+int main(int argc, char *argv[])
 {
     struct sockaddr_in address;
+    address.sin_family = AF_INET;
+    address.sin_addr.s_addr = INADDR_ANY;
+    address.sin_port = htons( PORT );
+
     int addrlen = sizeof(address);
     int opt = 1;
     int new_socket;
     char buffer[2048] = {0};
+    int sockfd = 0;
 
-    int sockfd = socket(AF_INET, SOCK_STREAM, 0);
-    if (!sockfd)
+
+    if ((sockfd = socket(AF_INET, SOCK_STREAM, 0)) < 0)
     {
         fprintf(stderr, "Couldn't create socket\n");
         exit(EXIT_FAILURE);
@@ -24,13 +29,10 @@ int main()
 
     if (setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)))
     {
-        fprintf(stderr, "Could attach the socket to port 8080, port already in use ?\n");
+        fprintf(stderr, "Couldn't attach the socket to port 8080, port already in use ?\n");
         exit(EXIT_FAILURE);
     }
 
-    address.sin_family = AF_INET;
-    address.sin_addr.s_addr = INADDR_ANY;
-    address.sin_port = htons( PORT );
     if (bind(sockfd, (struct sockaddr *)&address, addrlen) < 0)
     {
         fprintf(stderr, "bind failed\n");
@@ -41,12 +43,16 @@ int main()
 
     if ((new_socket = accept(sockfd, (struct sockaddr *)&address, (socklen_t*)&addrlen)) < 0 )
     {
-        fprintf(stderr, "bind failed\n");
+        fprintf(stderr, "accept failed\n");
         exit(EXIT_FAILURE);
     }
 
-    read(new_socket, buffer, 2048);
-    printf("%s\n",buffer );
-
+    char* message = "Server: hello";
+    while (recv(new_socket, buffer, 2048, 0) > 0)
+    {
+        printf("%s\n",buffer );
+        send(new_socket, message, strlen(message), 0);
+        printf("Message sent to client\n");
+    }
     return 0;
 }
