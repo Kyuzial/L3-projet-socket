@@ -97,7 +97,7 @@ int udpMode(int argc, char *argv[]) {
 }
 
 int main(int argc, char *argv[]) {
-	if (!strcmp(argv[1], "TCP")) {tcpMode
+	if (!strcmp(argv[1], "TCP")) {
 		tcpMode(argc, argv);
 	} else if (!strcmp(argv[1], "UDP")) {
 		udpMode(argc, argv);
