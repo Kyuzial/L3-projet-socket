@@ -5,6 +5,8 @@ BIN_SV = server.out
 SRCS_CL = src/client/client.c
 SRCS_SV = src/server/server.c
 
+all: client server
+
 client: $(SRCS_CL)
 	$(CC) $(CFLAGS) -o $(BIN_CL) $(SRCS_CL)
 
