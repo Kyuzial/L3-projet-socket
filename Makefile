@@ -13,6 +13,21 @@ client: $(SRCS_CL)
 server: $(SRCS_SV)
 	$(CC) $(CFLAGS) -o $(BIN_SV) $(SRCS_SV)
 
+st:
+	./server.out TCP
+
+ct:
+	./client.out TCP
+
+su:
+	./server.out UDP
+
+cu:	
+	./client.out UDP
+
+
 clean:
 	rm -f main
 	rm -f vgcore.*
+	rm -f client.out
+	rm -f server.out
