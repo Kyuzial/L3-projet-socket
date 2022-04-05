@@ -50,3 +50,13 @@ modules.order
 Module.symvers
 Mkfile.old
 dkms.conf
+
+# Latex
+*.toc
+*.aux
+*.fdb_latexmk
+*.fls
+*.log
+*.gz
+*.ilg
+*.synctex.gz
