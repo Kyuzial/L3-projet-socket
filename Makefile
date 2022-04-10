@@ -29,5 +29,7 @@ cu:
 clean:
 	rm -f main
 	rm -f vgcore.*
-	rm -f client.out
-	rm -f server.out
+	rm -f *.toc
+	rm -f *.gz
+	rm -f *.out
+	rm -f *.aux
