@@ -35,18 +35,27 @@ int tcpMode(int argc, char *argv[])
 	}
 	printf("Connected\n");
 
-	char *message = "Hello ";
-	send(sockfd, message, strlen(message), 0);
-	printf("Hello message sent\n");
+	while (1)
+	{
+		printf("client: \t");
+		scanf("%s", &buffer[0]);
+		send(sockfd, buffer, strlen(buffer), 0);
 
-	if (recv(sockfd, buffer, 2048, 0) < 1)
-	{
-		fprintf(stderr, "recv failed\n");
-		return 1;
-	}
-	else
-	{
-		printf("%s\n", buffer);
+		if (strcmp(buffer, ":exit") == 0)
+		{
+
+			close(sockfd);
+			exit(1);
+		}
+		if (recv(sockfd, buffer, 2048, 0) < 1)
+		{
+			fprintf(stderr, "recv failed\n");
+			return 1;
+		}
+		else
+		{
+			printf("server: \t%s\n", buffer);
+		}
 	}
 	return 1;
 }

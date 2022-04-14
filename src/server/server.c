@@ -3,56 +3,94 @@
 #include <stdlib.h>
 #include <string.h>
 #include <sys/socket.h>
+#include <sys/types.h>
 #include <unistd.h>
+#include <arpa/inet.h>
 
 #define PORT 8080
 
 int tcpMode()
 {
-    struct sockaddr_in address;
-    address.sin_family = AF_INET;
-    address.sin_addr.s_addr = INADDR_ANY;
-    address.sin_port = htons(PORT);
+    struct sockaddr_in serv_address;
 
-    int addrlen = sizeof(address);
     int opt = 1;
     int new_socket;
-    char buffer[2048] = {0};
+    struct sockaddr_in newaddress;
+    int addrlen1 = sizeof(serv_address);
+    int addrlen2 = sizeof(newaddress);
+    char buffer[2048];
     int sockfd = 0;
+    pid_t childpid;
 
     if ((sockfd = socket(AF_INET, SOCK_STREAM, 0)) < 0)
     {
         fprintf(stderr, "Couldn't create socket\n");
         exit(EXIT_FAILURE);
     }
-
-    if (setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)))
+    printf("server socket is created \n");
+    if (setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)) < 0)
     {
-        fprintf(stderr, "Couldn't attach the socket to port 8080, port already in use ?\n");
+        fprintf(stderr, "failed to set SO_REUSEADDR\n");
+        return 1;
+    }
+
+    if (setsockopt(sockfd, SOL_SOCKET, SO_REUSEPORT, &opt, sizeof(opt)) < 0)
+    {
+        fprintf(stderr, "failed to set SO_REUSEPORT\n");
+        return 1;
+    }
+
+    // memset(&serv_address,'\0',addrlen1);
+    serv_address.sin_family = AF_INET;
+    serv_address.sin_addr.s_addr = htonl(INADDR_ANY);
+    serv_address.sin_port = htons(PORT);
+
+    int ret = bind(sockfd, (struct sockaddr *)&serv_address, addrlen1);
+    if (ret < 0)
+    {
+        fprintf(stderr, "bind failed1\n");
         exit(EXIT_FAILURE);
     }
+    printf("bind to port \n");
 
-    if (bind(sockfd, (struct sockaddr *)&address, addrlen) < 0)
+    if (listen(sockfd, 10) == 0)
     {
-        fprintf(stderr, "bind failed\n");
-        exit(EXIT_FAILURE);
+        printf("listening....\n");
     }
-
-    listen(sockfd, 3);
-
-    if ((new_socket = accept(sockfd, (struct sockaddr *)&address, (socklen_t *)&addrlen)) < 0)
+    else
     {
-        fprintf(stderr, "accept failed\n");
-        exit(EXIT_FAILURE);
+        printf("bind failed2\n");
     }
-
-    char *message = "Server: hello";
-    while (recv(new_socket, buffer, 2048, 0) > 0)
+    while (1)
     {
-        printf("%s\n", buffer);
-        send(new_socket, message, strlen(message), 0);
-        printf("Message sent to client\n");
+        if ((new_socket = accept(sockfd, (struct sockaddr *)&newaddress, (socklen_t *)&addrlen2)) < 0)
+        {
+            fprintf(stderr, "accept failed\n");
+            exit(EXIT_FAILURE);
+        }
+        printf("connection accepted from %s:%d\n", inet_ntoa(newaddress.sin_addr), ntohs(newaddress.sin_port));
+        if ((childpid = fork()) == 0)
+        {
+            close(sockfd);
+            while (1)
+            {
+                recv(new_socket, buffer, 2048, 0);
+                if (strcmp(buffer, "exit") == 0)
+                {
+                    printf("disconnected from %s:%d\n", inet_ntoa(newaddress.sin_addr), ntohs(newaddress.sin_port));
+                    break;
+                }
+                else
+                {
+                    printf("client: %s\n", buffer);
+                    send(new_socket, buffer, strlen(buffer), 0);
+                    bzero(buffer, sizeof(buffer));
+                }
+            }
+        }
     }
+    close(new_socket);
+
     return 0;
 }
 
