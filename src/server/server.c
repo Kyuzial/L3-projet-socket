@@ -34,12 +34,6 @@ int tcpMode()
         return 1;
     }
 
-    if (setsockopt(sockfd, SOL_SOCKET, SO_REUSEPORT, &opt, sizeof(opt)) < 0)
-    {
-        fprintf(stderr, "failed to set SO_REUSEPORT\n");
-        return 1;
-    }
-
     // memset(&serv_address,'\0',addrlen1);
     serv_address.sin_family = AF_INET;
     serv_address.sin_addr.s_addr = htonl(INADDR_ANY);
