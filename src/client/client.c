@@ -109,14 +109,16 @@ int udpMode(int argc, char *argv[])
 		// send the message
 		if (sendto(sockfd, message, strlen(message), 0, (struct serv_addr *)&serv_addr, slen) == -1)
 		{
-			die("sendto()");
+			fprintf(stderr, "sendto()");
+			exit(1);
 		}
 
 		memset(buffer, '\0', 2048);
 
 		if (recvfrom(sockfd, buffer, 2048, 0, (struct serv_addr *)&serv_addr, &slen) == -1)
 		{
-			die("recvfrom()");
+			fprintf(stderr, "recvfrom()");
+			exit(1);
 		}
 
 		puts(buffer);

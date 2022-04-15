@@ -126,7 +126,8 @@ int udpMode()
         // try to receive  data
         if (recv_len = (recvfrom(sockfd, buffer, 2048, 0, (struct sockaddr *)&serv_addr, &slen)) == -1)
         {
-            die("recvfrom()");
+            fprintf(stderr, "recvfrom()");
+            exit(1);
         }
 
         printf("Received packet from %s:%d\n", inet_ntoa(serv_addr.sin_addr), ntohs(serv_addr.sin_port));
@@ -135,7 +136,8 @@ int udpMode()
         // now reply the client with the same data
         if (sendto(sockfd, buffer, recv_len, 0, (struct sockaddr *)&serv_addr, slen) == -1)
         {
-            die("sendto()");
+            fprintf(stderr, "sendto()");
+            exit(1);
         }
     }
 
