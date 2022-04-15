@@ -66,7 +66,7 @@ int udpMode(int argc, char *argv[])
 	struct sockaddr_in serv_addr;
 
 	char buffer[2048];
-	int sockfd;
+	int sockfd, i;
 
 	// Creating socket file descriptor
 	if ((sockfd = socket(AF_INET, SOCK_DGRAM, 0)) < 0)
@@ -74,25 +74,53 @@ int udpMode(int argc, char *argv[])
 		perror("socket creation failed");
 		exit(EXIT_FAILURE);
 	}
+	/*
+	  memset(&serv_addr, 0, sizeof(serv_addr));
 
-	memset(&serv_addr, 0, sizeof(serv_addr));
-
-	// Filling server information
+   // Filling server information
+	  serv_addr.sin_family = AF_INET;
+	  serv_addr.sin_port = htons(PORT);
+	  serv_addr.sin_addr.s_addr = INADDR_ANY;
+   */
+	memset((char *)&serv_addr, 0, sizeof(serv_addr));
 	serv_addr.sin_family = AF_INET;
 	serv_addr.sin_port = htons(PORT);
 	serv_addr.sin_addr.s_addr = INADDR_ANY;
 
 	int n, len;
-	char *message = "Client : hello ";
 
-	sendto(sockfd, (const char *)message, strlen(message), MSG_CONFIRM,
-		   (const struct sockaddr *)&serv_addr, sizeof(serv_addr));
-	printf("Hello message sent.\n");
+	char message[2048];
+	// char *message = "Client : hello ";
+	/*
+	 sendto(sockfd, (const char *)message, strlen(message), MSG_CONFIRM,
+			 (const struct sockaddr *)&serv_addr, sizeof(serv_addr));
+	 printf("Hello message sent.\n");
 
-	n = recvfrom(sockfd, (char *)buffer, sizeof(buffer), MSG_WAITALL,
+	 n = recvfrom(sockfd, (char *)buffer, sizeof(buffer), MSG_WAITALL,
 				 (struct sockaddr *)&serv_addr, &len);
-	buffer[n] = '\0';
-	printf("Server : %s\n", buffer);
+	 buffer[n] = '\0';
+	 printf("Server : %s\n", buffer);*/
+	int slen = sizeof(serv_addr);
+	while (1)
+	{
+		printf("Enter message : ");
+		gets(message);
+
+		// send the message
+		if (sendto(sockfd, message, strlen(message), 0, (struct serv_addr *)&serv_addr, slen) == -1)
+		{
+			die("sendto()");
+		}
+
+		memset(buffer, '\0', 2048);
+
+		if (recvfrom(sockfd, buffer, 2048, 0, (struct serv_addr *)&serv_addr, &slen) == -1)
+		{
+			die("recvfrom()");
+		}
+
+		puts(buffer);
+	}
 
 	close(sockfd);
 	return 0;

@@ -93,8 +93,8 @@ int udpMode()
 
     int sockfd;
     char buffer[2048];
-    char *hello = "Hello from server";
-    struct sockaddr_in serveur, client;
+    // char *hello = "Hello from server";
+    struct sockaddr_in serv_addr;
 
     // Creating socket file descriptor
     if ((sockfd = socket(AF_INET, SOCK_DGRAM, 0)) < 0)
@@ -103,32 +103,56 @@ int udpMode()
         exit(EXIT_FAILURE);
     }
 
-    memset(&serveur, 0, sizeof(serveur));
-    memset(&client, 0, sizeof(client));
+    memset((char *)&serv_addr, 0, sizeof(serv_addr));
     // Filling server information
-    serveur.sin_family = AF_INET; // IPv4
-    serveur.sin_addr.s_addr = INADDR_ANY;
-    serveur.sin_port = htons(PORT);
+    serv_addr.sin_family = AF_INET; // IPv4
+    serv_addr.sin_port = htons(PORT);
+    serv_addr.sin_addr.s_addr = htonl(INADDR_ANY);
 
     // Bind the socket with the server address
-    if (bind(sockfd, (const struct sockaddr *)&serveur, sizeof(serveur)) < 0)
+    if (bind(sockfd, (struct sockaddr *)&serv_addr, sizeof(serv_addr)) < 0)
     {
         perror("bind failed");
         exit(EXIT_FAILURE);
     }
 
-    int len, n;
+    int recv_len, slen = sizeof(serv_addr);
 
-    len = sizeof(client); // len is value/resuslt
+    while (1)
+    {
+        printf("Waiting for data...");
+        fflush(stdout);
 
-    n = recvfrom(sockfd, (char *)buffer, sizeof(buffer), MSG_WAITALL,
-                 (struct sockaddr *)&client, &len);
-    buffer[n] = '\0';
-    printf("%s\n", buffer);
-    sendto(sockfd, (const char *)hello, strlen(hello), MSG_CONFIRM,
-           (const struct sockaddr *)&client, len);
-    printf("Hello message sent.\n");
+        // try to receive  data
+        if (recv_len = (recvfrom(sockfd, buffer, 2048, 0, (struct sockaddr *)&serv_addr, &slen)) == -1)
+        {
+            die("recvfrom()");
+        }
 
+        printf("Received packet from %s:%d\n", inet_ntoa(serv_addr.sin_addr), ntohs(serv_addr.sin_port));
+        printf("Data: %s\n", buffer);
+
+        // now reply the client with the same data
+        if (sendto(sockfd, buffer, recv_len, 0, (struct sockaddr *)&serv_addr, slen) == -1)
+        {
+            die("sendto()");
+        }
+    }
+
+    close(sockfd);
+    /*
+      int len, n;
+
+      len = sizeof(client); // len is value/resuslt
+
+      n = recvfrom(sockfd, (char *)buffer, sizeof(buffer), MSG_WAITALL,
+                   (struct sockaddr *)&client, &len);
+      buffer[n] = '\0';
+      printf("%s\n", buffer);
+      sendto(sockfd, (const char *)hello, strlen(hello), MSG_CONFIRM,
+             (const struct sockaddr *)&client, len);
+      printf("Hello message sent.\n");
+  */
     return 0;
 }
 
